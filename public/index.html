@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>API Console</title>
+<style>
+:root{--bg:#0f1115;--fg:#e6e6e6;--mut:#8a8f98;--acc:#7aa2f7;--card:#171a21;--bd:#262a33}
+*{box-sizing:border-box}body{margin:0;font:14px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--fg)}
+main{max-width:900px;margin:0 auto;padding:24px 16px}h1{font-size:18px;margin:0 0 4px}p{color:var(--mut);margin:0 0 16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}select,input,textarea,button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px}
+input{flex:1;min-width:200px}textarea{width:100%;min-height:120px}button{background:var(--acc);color:#0f1115;border:0;cursor:pointer;font-weight:600}
+pre{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:12px;overflow:auto;white-space:pre-wrap}
+.ex{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.ex button{background:var(--card);color:var(--fg);border:1px solid var(--bd);font-weight:400}
+</style></head><body><main>
+<h1 id="title">API Console</h1>
+<p>Try the endpoints below. Examples prefill the form.</p>
+<div class="ex" id="examples"></div>
+<div class="row"><select id="m"><option>GET</option><option>POST</option><option>PATCH</option><option>PUT</option><option>DELETE</option></select>
+<input id="p" value="/health"><button id="go">Send</button></div>
+<textarea id="b" placeholder='{"json":"body"}'></textarea>
+<pre id="out">—</pre>
+</main><script>
+// EDIT THIS LIST to match the real endpoints (agent: keep in sync with README).
+const EXAMPLES = [
+  ["Health","GET","/health",""],
+  ["Create task","POST","/tasks",'{"title":"Write release notes","description":"Summarise changes for v1.2"}'],
+  ["List tasks","GET","/tasks?limit=10",""],
+];
+const $=id=>document.getElementById(id);
+EXAMPLES.forEach(([n,m,p,b])=>{const x=document.createElement("button");x.textContent=n;x.onclick=()=>{$("m").value=m;$("p").value=p;$("b").value=b};$("examples").append(x)});
+$("go").onclick=async()=>{
+  const opt={method:$("m").value,headers:{"content-type":"application/json"}};
+  if(!["GET","DELETE"].includes(opt.method)&&$("b").value.trim())opt.body=$("b").value;
+  const t0=performance.now();
+  try{const r=await fetch($("p").value,opt);const txt=await r.text();let body=txt;try{body=JSON.stringify(JSON.parse(txt),null,2)}catch{}
+  $("out").textContent=`${r.status} ${r.statusText} · ${Math.round(performance.now()-t0)}ms\n\n${body}`}catch(e){$("out").textContent=String(e)}
+};
+</script></body></html>
